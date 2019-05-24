@@ -1,5 +1,6 @@
 from miller_rabin_test import is_prime
 import random
+
 def generate_prime_candidate(size):
     p = random.getrandbits(size)
     p |= (1 << size - 1) | 1
@@ -25,33 +26,38 @@ def modinv(a, m):
         raise Exception('modular inverse does not exist')
     else:
         return x % m
+
 def L(x, p):
     return ((x-1) // p)
 def keys(size):
     p = generate_prime_numbers(size)
     q = generate_prime_numbers(size)
+    assert p != q
     n =  p*p*q
-    g =  random.randint(23,n)
-    assert ((gcd(g,n) == 1) and (pow(g, p-1, p**2)!=1))
-    h = pow(g, n, n)
-    return((n, g, h), (p, q))
+    while True:
+        x =  random.randint(23,n)
+        g = pow(x, p-1, p**2)
+        if g != 1:
+            break
+    return((n, g), (p, q))
+    
 def enc(pk,pt):
-    n,g,h = pk
+    n,g = pk
     r = random.randint(23,n)
-    k1 = pow(g,pt,n)
-    k2 = pow(h,r,n)
-    ct =  (k1 * k2) % n
+    ct = pow(g, (pt+(n*r)), n)
     return ct
 def dec(sk,g,ct):
     p,q = sk
     x1 = pow(ct, p-1, p**2)
     x2 = pow(g, p-1, p**2)
-    #x2 = modinv(x,p)
-    message = (L(x1,p) // L(x2,p)) % p
+    L1 = L(x1,p)
+    print(L1)
+    L2 = modinv(L(x2,p),p)
+    message = (L1* L2) % p
     return message
 def main():
-    pk, sk = keys(1024)
-    n,g,h = pk
+    pk, sk = keys(32)
+    n,g= pk
     print(pk,sk)
     disp = input("Do you want to test for homomorphism?(y/n):")
     if(disp == 'y'):
