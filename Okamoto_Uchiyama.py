@@ -73,7 +73,7 @@ def main():
         print("Decrypting")
         message = dec(sk,g, c3)
         print(message)
-        d = input("Is this less than plain m1 + m2?(y/n):")
+        d = input("Is this eqaul to m1 + m2?(y/n):")
         if(d == 'y'):
             print("Eureka!")
         else:
